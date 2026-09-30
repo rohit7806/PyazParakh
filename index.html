@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <title>PyazParakh — AI &amp; IoT Onion Grading System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0..1,-50..200" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            primary: '#2E7D32',
+            'primary-dark': '#1B5E20',
+            'primary-light': '#E8F5E9',
+            'primary-fixed': '#C8E6C9',
+            charcoal: '#1C1B1F',
+            'charcoal-muted': '#455A46',
+            'card-bg': '#FFFFFF',
+            'surface-low': '#F7FAF7',
+            'surface-mid': '#EFF5F0',
+            'surface-high': '#E5EFE6',
+            'surface-border': '#E0EAE1',
+            urs: '#B45309',
+            'urs-bg': '#FEF3C7',
+            reject: '#B3261E',
+            'reject-bg': '#FCE8E6',
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      background-color: #E2E8F0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #1C1B1F;
+      -webkit-font-smoothing: antialiased;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-outlined.outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 600, 'GRAD' 0, 'opsz' 24;
+    }
+    /* Mobile frame simulator on desktop, 100% on phone */
+    .app-viewport {
+      width: 100%;
+      max-width: 440px;
+      min-height: 100dvh;
+      height: 100dvh;
+      background-color: #FFFFFF;
+      position: relative;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+    @media (min-width: 640px) {
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 24px 0;
+      }
+      .app-viewport {
+        height: 900px;
+        border-radius: 40px;
+        border: 10px solid #1C1B1F;
+      }
+    }
+    .screen-container {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-bottom: 90px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .screen-container::-webkit-scrollbar {
+      display: none;
+    }
+    .pulse-dot {
+      animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.15); }
+    }
+    @keyframes spin-slow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .animate-spin-slow {
+      animation: spin-slow 2s linear infinite;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 16:9 Vertical Mobile Container -->
+  <div class="app-viewport">
+    
+    <!-- TOP APP BAR -->
+    <header id="app-header" class="w-full bg-white/95 backdrop-blur-md px-4 py-3 border-b border-surface-border flex items-center justify-between z-30 sticky top-0">
+      <div class="flex items-center gap-2">
+        <button id="header-back-btn" onclick="showScreen('home')" class="hidden w-8 h-8 rounded-full hover:bg-surface-mid flex items-center justify-center text-charcoal -ml-1">
+          <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+        </button>
+        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOPG7Yw40JYOvW7W3DpV63S6e2SLsXaQYYVV1ymq-ngdmgyHO56MxFVR8vKkOPQ406F1n4Jxb_sme5GUQlFf5c8IELvM1TGYi_W-k3PGVPtNRmAJ26bB_YxB48t0-Ixp1vbTJMvI04Q7ndCDgpVz1-gzWdsT-K4yJvFxsQD7eUnDFBhgftK5i1-xkgDpQUqF2brYTu43Ov8NcqKDmV52_FYePVbLLYl2JH-RkmQuuS5uwqqvgDatJIcA" alt="Logo" class="w-8 h-8 object-contain rounded-md"/>
+        <div id="header-branding">
+          <div class="flex items-center gap-1.5 leading-none">
+            <span class="font-extrabold text-[15px] text-charcoal">PyazParakh</span>
+            <span class="bg-primary text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded-full uppercase tracking-wider">AI</span>
+          </div>
+          <div class="flex items-center gap-1 text-[11px] text-charcoal-muted mt-0.5">
+            <span>Lasalgaon Mandi #4</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-primary pulse-dot"></span>
+            <span class="text-primary font-bold">Offline Ready</span>
+          </div>
+        </div>
+        <h1 id="header-title" class="hidden font-bold text-[16px] text-charcoal truncate">Batch Inspection Detail</h1>
+      </div>
+
+      <!-- Officer Profile Avatar -->
+      <div class="relative cursor-pointer" onclick="showToast('APMC Officer: Rajesh Kulkarni (Lasalgaon Yard)')">
+        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBg1UsMUEIdMucryf390IOYvUEq0ijn38gE7ff2m9zg5_1g986VSZTr2vpWN8qEh6qjeeRImS4Su2KKEoVt-7Dqk-lC1ojX95zbO5CTnECsS_YxMwRrpMwdOmvSFd29QtTdLHiyL19Wvx5dnvXs4zjLeuufZGksV7COf58LuIsE1HtHBZ93AjgKXfDPOFeYHkB9AV_PRjZ--0hn3SafVNjnvQ4UsMRKBGub22GOYYDT1IziSlX5cXmldw" alt="Officer Rajesh Kulkarni" class="w-9 h-9 rounded-full object-cover border-2 border-primary"/>
+        <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-primary ring-2 ring-white"></span>
+      </div>
+    </header>
+
+    <!-- ==================== SCREEN 1: HOME ==================== -->
+    <div id="screen-home" class="screen-container px-4 pt-3 space-y-4">
+      
+      <!-- Procurement Terminal Shift Card -->
+      <div class="bg-white rounded-2xl p-4 border border-surface-border shadow-sm space-y-3">
+        <div class="flex items-start justify-between">
+          <div>
+            <div class="flex items-center gap-1 text-primary text-[11px] font-extrabold uppercase tracking-wider">
+              <span class="material-symbols-outlined text-[14px]">verified</span>
+              <span>Procurement Terminal</span>
+            </div>
+            <h2 class="font-extrabold text-[18px] text-charcoal">Namaste, Rajesh Kulkarni</h2>
+            <p class="text-[12px] text-charcoal-muted font-semibold">Lasalgaon Mandi Yard 4 • Shift 08:00 - 16:00</p>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary-dark">
+            <span class="material-symbols-outlined text-[24px]">agriculture</span>
+          </div>
+        </div>
+
+        <!-- Shift Metrics -->
+        <div class="grid grid-cols-2 gap-2.5 pt-1">
+          <div class="bg-surface-low rounded-xl p-3 border border-surface-border">
+            <div class="flex items-center gap-1 text-[11px] font-semibold text-charcoal-muted">
+              <span class="material-symbols-outlined text-[15px]">scale</span>
+              <span>Scanned Today</span>
+            </div>
+            <div class="text-[20px] font-extrabold text-charcoal mt-0.5">
+              4,820 <span class="text-[12px] font-normal text-charcoal-muted">kg</span>
+            </div>
+            <div class="text-[11px] font-bold text-primary mt-0.5">28 Batches Cleared</div>
+          </div>
+
+          <div class="bg-primary-light rounded-xl p-3 border border-[#C8E6C9]">
+            <div class="flex items-center gap-1 text-[11px] font-semibold text-primary-dark">
+              <span class="material-symbols-outlined text-[15px]">grade</span>
+              <span>Avg Grade A</span>
+            </div>
+            <div class="text-[20px] font-extrabold text-primary-dark mt-0.5">78.4%</div>
+            <div class="text-[11px] font-bold text-primary mt-0.5">+4.2% vs Yesterday</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Inference Engine Trigger Card -->
+      <div class="bg-white rounded-2xl p-4 border border-surface-border shadow-sm space-y-3.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-primary pulse-dot"></span>
+            <span class="text-[12px] font-extrabold text-charcoal uppercase tracking-wider">AI Inference Engine</span>
+          </div>
+          <span class="bg-primary-fixed text-primary-dark text-[11px] font-extrabold px-2.5 py-0.5 rounded-full">
+            Model v4.1 On-Device
+          </span>
+        </div>
+
+        <!-- Prominent Capture Button -->
+        <button onclick="openModal('capture-modal')" class="w-full bg-primary hover:bg-primary-dark active:scale-[0.98] transition-all text-white p-3.5 rounded-xl shadow-md flex items-center justify-between text-left">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+              <span class="material-symbols-outlined text-[28px] text-white">photo_camera</span>
+            </div>
+            <div>
+              <div class="font-extrabold text-[16px] text-white leading-tight">Capture Onion Batch</div>
+              <div class="text-[12px] text-white/90">Instant 10-sec optical grading</div>
+            </div>
+          </div>
+          <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+            <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+          </div>
+        </button>
+
+        <!-- Profile Selector -->
+        <div class="bg-surface-low rounded-xl p-2.5 space-y-1.5 border border-surface-border">
+          <span class="text-[11px] font-bold text-charcoal-muted">Select Inspection Profile</span>
+          <div class="grid grid-cols-2 gap-2" id="profile-toggle">
+            <button onclick="setProfile('crate')" id="btn-profile-crate" class="py-2 px-3 rounded-lg text-[12px] font-bold flex items-center justify-center gap-1.5 bg-charcoal text-white shadow-sm transition-colors">
+              <span class="material-symbols-outlined text-[16px]">inventory_2</span>
+              <span>Crate (Top-Down)</span>
+            </button>
+            <button onclick="setProfile('trolley')" id="btn-profile-trolley" class="py-2 px-3 rounded-lg text-[12px] font-bold flex items-center justify-center gap-1.5 bg-white text-charcoal-muted border border-surface-border hover:bg-surface-mid transition-colors">
+              <span class="material-symbols-outlined text-[16px]">rv_hookup</span>
+              <span>Trolley / Sack Pile</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calibration Banner -->
+      <div class="bg-surface-mid rounded-xl p-3 border border-surface-border flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center text-primary shadow-xs">
+            <span class="material-symbols-outlined text-[20px]">wb_sunny</span>
+          </div>
+          <div>
+            <div class="font-extrabold text-[12px] text-charcoal">Optical Calibration: 1.2m Height</div>
+            <div class="text-[11px] text-charcoal-muted">Hold level over crate in direct daylight</div>
+          </div>
+        </div>
+        <span class="inline-flex items-center gap-1 bg-white text-primary text-[11px] font-bold px-2 py-0.5 rounded-full border border-surface-border">
+          <span class="material-symbols-outlined text-[14px]">check_circle</span>
+          Calibrated
+        </span>
+      </div>
+
+      <!-- Recent Inspections Header -->
+      <div class="flex items-center justify-between pt-1">
+        <div class="flex items-center gap-2">
+          <h3 class="font-extrabold text-[16px] text-charcoal">Recent Inspections</h3>
+          <span class="bg-surface-high text-charcoal-muted text-[11px] font-bold px-2 py-0.5 rounded-full">Today</span>
+        </div>
+        <button onclick="showToast('Showing all APMC lots')" class="text-primary font-extrabold text-[12px] flex items-center gap-0.5 hover:underline">
+          View All (142)
+          <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+        </button>
+      </div>
+
+      <!-- Recent Inspection List -->
+      <div class="space-y-2.5" id="recent-inspections-list">
+        <!-- Lot 1 -->
+        <div onclick="openInspectionDetail('PP-8492')" class="bg-white rounded-xl p-3.5 border border-surface-border shadow-xs hover:border-primary cursor-pointer transition-all space-y-2.5">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-3">
+              <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5unNx17yIVQYw6EtnUimGdqr2UH5_4Px6DPxBSL0kCY9HY6diSGQOP5eY_BbO9ADJ9fxZHqo2bLRg7YOAwosyDuYQXnPqsX09yu82yZ2OMOTJi4NizadnpKcsg8aoBPbiHUT2ScaXFBA_FNK-fC7YF6T2sWsX8lbk09NuHkL5zj6_QMH0HBDYGUzZgWXeiCdBrs1Ga6EHGvdn8QUCRDqVxGudibgL9KrkzEHGly174-Xnn30Oyk5OIg" alt="Lot PP-8492" class="w-12 h-12 rounded-lg object-cover bg-surface-mid"/>
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <span class="font-extrabold text-[13px] text-charcoal">Lot #PP-8492</span>
+                  <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                  <span class="text-[11px] text-charcoal-muted">2 mins ago</span>
+                </div>
+                <div class="text-[12px] font-bold text-charcoal-muted">Farmer: Ramesh Patil</div>
+              </div>
+            </div>
+            <span class="bg-primary-light text-primary-dark font-extrabold text-[11px] px-2.5 py-0.5 rounded-full border border-[#C8E6C9]">
+              Grade A (84%)
+            </span>
+          </div>
+
+          <!-- Yield Bar -->
+          <div class="w-full bg-surface-mid rounded-full h-2 overflow-hidden flex">
+            <div class="bg-primary h-full" style="width: 84%;"></div>
+            <div class="bg-amber-500 h-full" style="width: 12%;"></div>
+            <div class="bg-reject h-full" style="width: 4%;"></div>
+          </div>
+
+          <div class="flex items-center justify-between text-[11px]">
+            <div class="flex items-center gap-1.5 font-bold">
+              <span class="text-charcoal">120 Bulbs Analyzed</span>
+              <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+              <span class="text-primary flex items-center gap-0.5">
+                <span class="material-symbols-outlined text-[13px]">check</span>
+                Passed For Export
+              </span>
+            </div>
+            <span class="material-symbols-outlined text-[18px] text-charcoal-muted">chevron_right</span>
+          </div>
+        </div>
+
+        <!-- Lot 2 -->
+        <div onclick="openInspectionDetail('PP-8491')" class="bg-white rounded-xl p-3.5 border border-surface-border shadow-xs hover:border-primary cursor-pointer transition-all space-y-2.5">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-3">
+              <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhjPkpi0g6VSwNFs-vufCBmfYuDT7asWP74VnYDpnh5xDbQinT6ZzkFiT7k-PGxigIUnlwZnKxrfK1F1Vd1av2psiP2-1Ucde7zPO50a5tCFVd3FH91gVXDO9QpRSntYLyz8zKtX9e_eaWat1RaJSeGaN4XQgNjXSGXVyQRAzhBeU1WKMDxhZUsB3lJ9Y1WonFbQZnCA6boZcdXL8eoqn4sIRVQ1fdAzvbYl-PpQ3U0ivqLW6Jk-pUMw" alt="Lot PP-8491" class="w-12 h-12 rounded-lg object-cover bg-surface-mid"/>
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <span class="font-extrabold text-[13px] text-charcoal">Lot #PP-8491</span>
+                  <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                  <span class="text-[11px] text-charcoal-muted">18 mins ago</span>
+                </div>
+                <div class="text-[12px] font-bold text-charcoal-muted">Farmer: Anand Shinde</div>
+              </div>
+            </div>
+            <span class="bg-urs-bg text-urs font-extrabold text-[11px] px-2.5 py-0.5 rounded-full border border-amber-300">
+              URS Mixed (62%)
+            </span>
+          </div>
+
+          <div class="w-full bg-surface-mid rounded-full h-2 overflow-hidden flex">
+            <div class="bg-primary h-full" style="width: 62%;"></div>
+            <div class="bg-amber-500 h-full" style="width: 28%;"></div>
+            <div class="bg-reject h-full" style="width: 10%;"></div>
+          </div>
+
+          <div class="flex items-center justify-between text-[11px]">
+            <div class="flex items-center gap-1.5 font-bold">
+              <span class="text-charcoal">95 Bulbs Analyzed</span>
+              <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+              <span class="text-urs flex items-center gap-0.5">
+                <span class="material-symbols-outlined text-[13px]">sync_problem</span>
+                Re-sorting Suggested
+              </span>
+            </div>
+            <span class="material-symbols-outlined text-[18px] text-charcoal-muted">chevron_right</span>
+          </div>
+        </div>
+
+        <!-- Lot 3 -->
+        <div onclick="openInspectionDetail('PP-8488')" class="bg-white rounded-xl p-3.5 border border-surface-border shadow-xs hover:border-primary cursor-pointer transition-all space-y-2.5">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-3">
+              <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5DwJ-muCzXR15ojBFkL_HS7onmcwrRPj3ynq1CSX1sJH1DQKxz1zvD4xHXFXqI54DB2cR3NEiKLwZtA_TPrXfagOIC7RhL9EZmB8-bxKjVd4BhUU6kAQzSsLjjvO0hNJp0B8a3mhtX1ukLsOaAlijVt7lLp6lcVYTO_t1Is2Yyz0oGByY5JCyiXluRgOaN0ljuAQQGrumpPKT7bwLNzwnjce72fJkpSVz6TKG8nK8LbE9csyjyjS0Fw" alt="Lot PP-8488" class="w-12 h-12 rounded-lg object-cover bg-surface-mid"/>
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <span class="font-extrabold text-[13px] text-charcoal">Lot #PP-8488</span>
+                  <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                  <span class="text-[11px] text-charcoal-muted">42 mins ago</span>
+                </div>
+                <div class="text-[12px] font-bold text-charcoal-muted">Trader: Sahyadri FPO</div>
+              </div>
+            </div>
+            <span class="bg-primary-light text-primary-dark font-extrabold text-[11px] px-2.5 py-0.5 rounded-full border border-[#C8E6C9]">
+              Grade A (91%)
+            </span>
+          </div>
+
+          <div class="w-full bg-surface-mid rounded-full h-2 overflow-hidden flex">
+            <div class="bg-primary h-full" style="width: 91%;"></div>
+            <div class="bg-amber-500 h-full" style="width: 7%;"></div>
+            <div class="bg-reject h-full" style="width: 2%;"></div>
+          </div>
+
+          <div class="flex items-center justify-between text-[11px]">
+            <div class="flex items-center gap-1.5 font-bold">
+              <span class="text-charcoal">180 Bulbs Analyzed</span>
+              <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+              <span class="text-primary flex items-center gap-0.5">
+                <span class="material-symbols-outlined text-[13px]">verified</span>
+                Passed For Cold Storage
+              </span>
+            </div>
+            <span class="material-symbols-outlined text-[18px] text-charcoal-muted">chevron_right</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Field Protocol Notice -->
+      <div class="bg-surface-low rounded-xl p-3 border border-surface-border flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-surface-mid flex items-center justify-center text-charcoal-muted flex-shrink-0">
+          <span class="material-symbols-outlined text-[18px]">light_mode</span>
+        </div>
+        <div class="text-[11px] leading-snug">
+          <span class="font-extrabold text-charcoal">Field Protocol Notice:</span>
+          <span class="text-charcoal-muted"> Shadow-free lighting delivers 99.2% classification accuracy for inner-layer rot detection.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN 2: SCAN RESULTS / BATCH INSPECTION DETAIL ==================== -->
+    <div id="screen-scan" class="screen-container px-4 pt-3 space-y-4 hidden">
+      
+      <!-- Top Batch Context Header -->
+      <div class="bg-white rounded-2xl p-3.5 border border-surface-border shadow-xs space-y-1.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-1.5">
+            <span class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+              <span class="material-symbols-outlined text-[15px]">verified</span>
+            </span>
+            <span class="font-extrabold text-[16px] text-charcoal" id="detail-lot-title">Lot #PP-8492</span>
+          </div>
+          <span class="inline-flex items-center gap-1 bg-surface-mid px-2.5 py-0.5 rounded-full text-charcoal-muted text-[11px] font-extrabold uppercase">
+            <span class="w-1.5 h-1.5 rounded-full bg-primary pulse-dot"></span>
+            GATE 2
+          </span>
+        </div>
+        <div class="flex items-center gap-1.5 text-charcoal-muted text-[11px]">
+          <span class="material-symbols-outlined text-[14px]">schedule</span>
+          <span>Today, 11:24 AM</span>
+          <span>•</span>
+          <span class="truncate">Lasalgaon APMC Mandi Yard</span>
+        </div>
+      </div>
+
+      <!-- AI Viewport Container with Detection Reticles -->
+      <div class="bg-white rounded-2xl overflow-hidden border border-surface-border shadow-xs">
+        <div class="relative w-full aspect-[4/3] bg-charcoal overflow-hidden select-none">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0qIG8K8FnivzOpHb1wwonVVisWHqlGA5cWxwj49rCOZAd3KQJDZd248zfkqj6IQSLzNX4_zbGgVmAG0E9gOG1YOYhK49KDok7AanlTX5hyV824p-KqCuWjQuTwvMeYhNpWG3OjC8a8TISreWcpyqlYBIQdTTN44BxZhecxjykGPOWcAJ19Ha_GFi8gb0Q1pmF34bMyzPyfB2BWR72jbV7HTaqUQTfHTBtk3XNbR6s_HDfH2Oi_hFYNg" alt="Onions in Crate" class="w-full h-full object-cover"/>
+          
+          <div class="absolute inset-0 bg-gradient-to-t from-charcoal/60 via-transparent to-charcoal/40 pointer-events-none"></div>
+          
+          <!-- Top Viewport Indicators -->
+          <div class="absolute top-2.5 left-2.5 z-10 flex items-center gap-1 bg-charcoal/80 backdrop-blur-md px-2 py-0.5 rounded-full text-white text-[10px] font-bold shadow">
+            <span class="material-symbols-outlined text-[13px] text-[#C8E6C9]">center_focus_strong</span>
+            <span>Live Reticles</span>
+          </div>
+          <div class="absolute top-2.5 right-2.5 z-10 flex items-center gap-1 bg-charcoal/80 backdrop-blur-md px-2 py-0.5 rounded-full text-white text-[10px] font-bold shadow">
+            <span class="material-symbols-outlined text-[13px] text-[#C8E6C9]">smart_toy</span>
+            <span>Model v4.2 • 97.8% Conf</span>
+          </div>
+
+          <!-- Bounding Reticles Overlaid on Onions -->
+          <div id="reticles-container">
+            <!-- Reticle 1: Grade A -->
+            <div onclick="openBulbDiagnostic('Grade A • 55mm', '55 mm', 'Grade A', '98%', 'Optimal 94% Dry Papery', 'Tight & Dried')" class="reticle-box reticle-grade-a absolute left-[26%] top-[18%] w-[18%] h-[24%] border-2 border-primary bg-primary/20 rounded-md cursor-pointer transition-transform active:scale-95">
+              <span class="absolute -top-4 left-0 bg-primary text-white text-[9px] font-extrabold px-1 py-0.2 rounded shadow whitespace-nowrap">
+                Grade A • 55mm
+              </span>
+            </div>
+            <!-- Reticle 2: Grade A -->
+            <div onclick="openBulbDiagnostic('Grade A (52mm) [98%]', '52 mm', 'Grade A', '98%', 'Optimal 95% Dry Papery', 'Tight & Dried')" class="reticle-box reticle-grade-a absolute left-[46%] top-[34%] w-[22%] h-[28%] border-2 border-primary bg-primary/20 rounded-md cursor-pointer transition-transform active:scale-95">
+              <span class="absolute -top-4 left-0 bg-primary text-white text-[9px] font-extrabold px-1 py-0.2 rounded shadow whitespace-nowrap">
+                Grade A (52mm) [98%]
+              </span>
+            </div>
+            <!-- Reticle 3: Grade A -->
+            <div onclick="openBulbDiagnostic('Grade A • 50mm', '50 mm', 'Grade A', '95%', 'Optimal 92% Dry Papery', 'Tight & Dried')" class="reticle-box reticle-grade-a absolute left-[14%] top-[48%] w-[16%] h-[22%] border-2 border-primary bg-primary/20 rounded-md cursor-pointer transition-transform active:scale-95">
+              <span class="absolute -top-4 left-0 bg-primary text-white text-[9px] font-extrabold px-1 py-0.2 rounded shadow whitespace-nowrap">
+                Grade A • 50mm
+              </span>
+            </div>
+            <!-- Reticle 4: URS Small -->
+            <div onclick="openBulbDiagnostic('URS Small (<35mm)', '34 mm', 'URS', '94%', 'Dry Papery (Slight peel)', 'Moderate double heart', 'Sub-35mm Under-sized produce')" class="reticle-box reticle-urs absolute right-[18%] top-[22%] w-[15%] h-[20%] border-2 border-amber-500 bg-amber-500/20 rounded-md cursor-pointer transition-transform active:scale-95">
+              <span class="absolute -top-4 right-0 bg-amber-600 text-white text-[9px] font-extrabold px-1 py-0.2 rounded shadow whitespace-nowrap">
+                URS Small (&lt;35mm)
+              </span>
+            </div>
+            <!-- Reticle 5: URS -->
+            <div onclick="openBulbDiagnostic('URS • 31mm', '31 mm', 'URS', '92%', 'Dry Papery', 'Dried', 'Moderate double bulb shape')" class="reticle-box reticle-urs absolute left-[42%] bottom-[12%] w-[14%] h-[18%] border-2 border-amber-500 bg-amber-500/20 rounded-md cursor-pointer transition-transform active:scale-95">
+              <span class="absolute -top-4 left-0 bg-amber-600 text-white text-[9px] font-extrabold px-1 py-0.2 rounded shadow whitespace-nowrap">
+                URS • 31mm
+              </span>
+            </div>
+            <!-- Reticle 6: Basal Rot Defect -->
+            <div onclick="openBulbDiagnostic('Basal Rot Detected', '48 mm', 'REJECT', '96%', 'Compromised (Wet Lesion)', 'Soft watery base plate', 'Fusarium Basal Rot active fungal decay')" class="reticle-box reticle-reject absolute left-[64%] top-[54%] w-[18%] h-[24%] border-2 border-reject bg-reject/25 rounded-md cursor-pointer animate-pulse transition-transform active:scale-95">
+              <span class="absolute -top-4 left-0 bg-reject text-white text-[9px] font-extrabold px-1 py-0.2 rounded shadow whitespace-nowrap flex items-center gap-0.5">
+                <span class="material-symbols-outlined text-[10px]">warning</span>
+                Basal Rot Detected
+              </span>
+            </div>
+            <!-- Reticle 7: Sprouted Neck -->
+            <div onclick="openBulbDiagnostic('Sprouted Neck', '46 mm', 'REJECT', '93%', 'Semi-dry', 'Open vegetative neck', 'Emerging green shoot (>20mm)')" class="reticle-box reticle-reject absolute right-[8%] top-[40%] w-[15%] h-[20%] border-2 border-reject bg-reject/20 rounded-md cursor-pointer transition-transform active:scale-95">
+              <span class="absolute -top-4 right-0 bg-reject text-white text-[9px] font-extrabold px-1 py-0.2 rounded shadow whitespace-nowrap">
+                Sprouted Neck
+              </span>
+            </div>
+          </div>
+
+          <!-- Bottom Viewport Info -->
+          <div class="absolute bottom-2 left-2 right-2 flex items-center justify-between text-white text-[10px] bg-charcoal/80 backdrop-blur-sm px-2.5 py-1 rounded-lg">
+            <span class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-[12px] text-[#C8E6C9]">touch_app</span>
+              Tap boxes to inspect bulb diagnostics
+            </span>
+            <span class="font-extrabold text-[#C8E6C9]">142 Found</span>
+          </div>
+        </div>
+
+        <!-- Filter Pills Bar -->
+        <div class="p-2 bg-surface-low border-t border-surface-border flex items-center gap-1.5">
+          <button onclick="filterReticles('all')" id="rf-all" class="flex-1 py-1.5 rounded-full text-[11px] font-bold bg-charcoal text-white text-center shadow-xs transition-colors">
+            All <span class="opacity-80 text-[10px]">142</span>
+          </button>
+          <button onclick="filterReticles('grade-a')" id="rf-grade-a" class="flex-1 py-1.5 rounded-full text-[11px] font-bold bg-white text-charcoal border border-surface-border text-center shadow-xs hover:bg-surface-mid transition-colors">
+            <span class="w-1.5 h-1.5 rounded-full bg-primary inline-block mr-1"></span>Grade A <span class="text-charcoal-muted text-[10px]">108</span>
+          </button>
+          <button onclick="filterReticles('urs')" id="rf-urs" class="flex-1 py-1.5 rounded-full text-[11px] font-bold bg-white text-charcoal border border-surface-border text-center shadow-xs hover:bg-surface-mid transition-colors">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block mr-1"></span>URS <span class="text-charcoal-muted text-[10px]">24</span>
+          </button>
+          <button onclick="filterReticles('reject')" id="rf-reject" class="flex-1 py-1.5 rounded-full text-[11px] font-bold bg-white text-charcoal border border-surface-border text-center shadow-xs hover:bg-surface-mid transition-colors">
+            <span class="w-1.5 h-1.5 rounded-full bg-reject inline-block mr-1"></span>Reject <span class="text-charcoal-muted text-[10px]">10</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Grading Breakdown Section -->
+      <div class="space-y-2.5">
+        <div class="flex items-center justify-between">
+          <h3 class="font-extrabold text-[16px] text-charcoal">Grading Breakdown</h3>
+          <span class="bg-primary-light text-primary-dark font-extrabold text-[11px] px-2 py-0.5 rounded-md border border-[#C8E6C9]">
+            Standard APMC-V4
+          </span>
+        </div>
+
+        <!-- Total Bulbs Counter Card -->
+        <div class="bg-white rounded-2xl p-4 border border-surface-border shadow-xs flex items-center justify-between">
+          <div>
+            <span class="text-[11px] font-extrabold text-charcoal-muted uppercase tracking-wider">Total Bulbs Scanned</span>
+            <div class="flex items-baseline gap-2 mt-0.5">
+              <span class="text-[26px] font-extrabold text-charcoal">142</span>
+              <span class="text-[13px] font-bold text-primary">Bulbs in Crate #04</span>
+            </div>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-surface-mid flex items-center justify-center text-primary">
+            <span class="material-symbols-outlined text-[26px]">grid_view</span>
+          </div>
+        </div>
+
+        <!-- Segmented Yield Gauge Card -->
+        <div class="bg-white rounded-2xl p-4 border border-surface-border shadow-xs space-y-2">
+          <div class="flex items-center justify-between text-[12px]">
+            <span class="text-charcoal-muted font-semibold">Batch Proportions</span>
+            <span class="text-charcoal font-extrabold">93% Commercial Yield</span>
+          </div>
+          <div class="w-full bg-surface-mid rounded-full h-2.5 overflow-hidden flex">
+            <div class="bg-primary h-full" style="width: 76%;"></div>
+            <div class="bg-amber-500 h-full" style="width: 17%;"></div>
+            <div class="bg-reject h-full" style="width: 7%;"></div>
+          </div>
+          <div class="flex items-center justify-between text-[11px] text-charcoal-muted">
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-primary"></span> 76% Premium</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span> 17% Table URS</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-reject"></span> 7% Rejection</span>
+          </div>
+        </div>
+
+        <!-- 3 Tier Cards -->
+        <div class="space-y-2">
+          <!-- Grade A -->
+          <div class="bg-white rounded-2xl p-3.5 border border-surface-border shadow-xs space-y-1">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+                <span class="font-extrabold text-[15px] text-charcoal">Grade A</span>
+                <span class="bg-primary-light text-primary-dark font-extrabold text-[11px] px-2 py-0.5 rounded-full">
+                  108 Bulbs
+                </span>
+              </div>
+              <span class="font-extrabold text-[18px] text-primary">76%</span>
+            </div>
+            <p class="text-[11px] text-charcoal-muted leading-relaxed">
+              Export &amp; Premium Market standard. Uniform 45–65mm diameter, dry intact skins, tight necks.
+            </p>
+          </div>
+
+          <!-- URS Grade -->
+          <div class="bg-white rounded-2xl p-3.5 border border-surface-border shadow-xs space-y-1">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                <span class="font-extrabold text-[15px] text-charcoal">URS Grade</span>
+                <span class="bg-urs-bg text-urs font-extrabold text-[11px] px-2 py-0.5 rounded-full">
+                  24 Bulbs
+                </span>
+              </div>
+              <span class="font-extrabold text-[18px] text-urs">17%</span>
+            </div>
+            <p class="text-[11px] text-charcoal-muted leading-relaxed">
+              Under-sized produce (&lt;35mm) &amp; moderate doubles. Suited for domestic table retail or dehydration.
+            </p>
+          </div>
+
+          <!-- Rejected -->
+          <div class="bg-white rounded-2xl p-3.5 border border-surface-border shadow-xs space-y-1">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-reject"></span>
+                <span class="font-extrabold text-[15px] text-charcoal">Defects &amp; Rejects</span>
+                <span class="bg-reject-bg text-reject font-extrabold text-[11px] px-2 py-0.5 rounded-full">
+                  10 Bulbs
+                </span>
+              </div>
+              <span class="font-extrabold text-[18px] text-reject">7%</span>
+            </div>
+            <p class="text-[11px] text-charcoal-muted leading-relaxed">
+              Unfit for storage. Shows active rot, fungal lesions, or vegetative sprouting.
+            </p>
+          </div>
+        </div>
+
+        <!-- Defect Telemetry List -->
+        <div class="bg-white rounded-2xl p-3.5 border border-surface-border shadow-xs space-y-2">
+          <span class="text-[11px] font-extrabold text-charcoal-muted uppercase tracking-wider">Identified Defect Telemetry</span>
+          <div class="divide-y divide-surface-border text-[12px]">
+            <div class="flex items-center justify-between py-2">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-[16px] text-reject">coronavirus</span>
+                <span class="font-bold text-charcoal">Basal Rot</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-charcoal">6 bulbs</span>
+                <span class="bg-reject-bg text-reject font-extrabold text-[10px] px-1.5 py-0.5 rounded">4.2%</span>
+              </div>
+            </div>
+            <div class="flex items-center justify-between py-2">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-[16px] text-reject">grain</span>
+                <span class="font-bold text-charcoal">Black Mold (Aspergillus)</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-charcoal">3 bulbs</span>
+                <span class="bg-reject-bg text-reject font-extrabold text-[10px] px-1.5 py-0.5 rounded">2.1%</span>
+              </div>
+            </div>
+            <div class="flex items-center justify-between py-2">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-[16px] text-amber-600">call_split</span>
+                <span class="font-bold text-charcoal">Double Bulbing</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-charcoal">1 bulb</span>
+                <span class="bg-surface-mid text-charcoal-muted font-bold text-[10px] px-1.5 py-0.5 rounded">0.7%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Suggested APMC Fair Price Banner -->
+        <div class="bg-primary text-white rounded-2xl p-4 shadow-md flex items-center justify-between">
+          <div>
+            <span class="text-[11px] font-extrabold text-[#C8E6C9] uppercase tracking-wider">Suggested APMC Fair Price</span>
+            <div class="flex items-baseline gap-1 mt-0.5">
+              <span class="text-[26px] font-extrabold text-white">₹2,450</span>
+              <span class="text-[12px] text-white/90">/ Quintal</span>
+            </div>
+            <div class="flex items-center gap-1 text-[11px] text-white/90 mt-1">
+              <span class="material-symbols-outlined text-[14px]">trending_up</span>
+              <span>Premium Grade A Batch Index</span>
+            </div>
+          </div>
+          <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-white">
+            <span class="material-symbols-outlined text-[28px]">currency_rupee</span>
+          </div>
+        </div>
+
+        <!-- Auxiliary Action Buttons -->
+        <div class="space-y-2 pt-1">
+          <button onclick="showToast('Dispatched WhatsApp Grade Summary to farmer +91 98231 44812')" class="w-full py-2.5 px-4 bg-white hover:bg-surface-low border border-surface-border text-charcoal rounded-xl text-[12px] font-bold shadow-xs flex items-center justify-center gap-2 transition-colors">
+            <span class="material-symbols-outlined text-[18px] text-primary">share</span>
+            Share via WhatsApp to Farmer (+91 98231 XXXXX)
+          </button>
+          <button onclick="openModal('capture-modal')" class="w-full py-2 text-charcoal-muted hover:text-charcoal text-[11px] font-bold flex items-center justify-center gap-1 transition-colors">
+            <span class="material-symbols-outlined text-[15px]">flip_camera_android</span>
+            Recalibrate / Take Rescan Photo
+          </button>
+        </div>
+      </div>
+
+      <!-- Sticky Bottom Generate Receipt CTA -->
+      <div class="sticky bottom-0 bg-white/95 backdrop-blur-md pt-2 pb-3 -mx-4 px-4 border-t border-surface-border z-20">
+        <button onclick="openModal('receipt-modal')" class="w-full py-3.5 bg-primary hover:bg-primary-dark active:scale-[0.98] transition-all text-white font-extrabold text-[15px] rounded-full shadow-lg flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-[20px]">receipt_long</span>
+          Generate Digital Receipt
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN 3: STORAGE TELEMETRY ==================== -->
+    <div id="screen-storage" class="screen-container px-4 pt-3 space-y-4 hidden">
+      
+      <!-- Facility Header Card -->
+      <div class="bg-white rounded-2xl p-4 border border-surface-border shadow-xs space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-1.5 text-charcoal-muted text-[11px] font-extrabold uppercase">
+            <span class="material-symbols-outlined text-[16px] text-primary">warehouse</span>
+            <span>Facility Telemetry</span>
+          </div>
+          <span class="bg-surface-mid px-2.5 py-0.5 rounded-full text-charcoal-muted text-[10px] font-bold flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-primary pulse-dot"></span>
+            Zigbee Hub 03 • 45s ago
+          </span>
+        </div>
+
+        <div class="bg-surface-low rounded-xl p-3 border border-surface-border flex items-center justify-between">
+          <div>
+            <h2 class="font-extrabold text-[16px] text-charcoal">Kanda Chaal #07</h2>
+            <p class="text-[12px] text-charcoal-muted">Ventilated Structure — Niphad Yard</p>
+          </div>
+          <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-charcoal border border-surface-border">
+            <span class="material-symbols-outlined text-[18px]">unfold_more</span>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between text-[12px]">
+          <div class="flex items-center gap-1.5 font-bold text-charcoal">
+            <span class="material-symbols-outlined text-[16px] text-primary">inventory_2</span>
+            <span>120 MT <span class="font-normal text-charcoal-muted">Stored</span></span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-20 bg-surface-mid rounded-full h-2 overflow-hidden">
+              <div class="bg-primary h-full" style="width: 82%;"></div>
+            </div>
+            <span class="bg-primary-fixed text-primary-dark font-extrabold text-[10px] px-1.5 py-0.5 rounded">82% Full</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Storage Rot Risk Alert Banner -->
+      <div id="rot-alert-banner" class="bg-reject-bg rounded-2xl p-4 border border-red-200 shadow-xs space-y-2.5">
+        <div class="flex items-start justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-reject flex-shrink-0">
+              <span class="material-symbols-outlined text-[20px]">warning</span>
+            </div>
+            <div>
+              <span class="text-[10px] font-extrabold text-reject uppercase tracking-wider block">Early Rot Detection Alert</span>
+              <span class="text-[13px] font-extrabold text-charcoal">MODERATE ELEVATED (Level 2/4)</span>
+            </div>
+          </div>
+          <span class="bg-reject text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full">Risk Zone C2</span>
+        </div>
+
+        <p class="text-[11px] text-charcoal leading-relaxed">
+          Micro-pocket in <strong class="text-charcoal font-extrabold">Stack C2</strong> indicates trapped humidity (<span class="text-reject font-extrabold">68% RH</span>) and thermal spike (<span class="text-reject font-extrabold">+1.8°C</span>). Spoilage risk rising over 6h horizon.
+        </p>
+
+        <div class="flex items-center gap-2 pt-1">
+          <button id="btn-aeration-toggle" onclick="toggleAerationFans()" class="flex-1 py-2.5 px-4 bg-primary hover:bg-primary-dark active:scale-[0.98] transition-all text-white text-[12px] font-extrabold rounded-full shadow-sm flex items-center justify-center gap-1.5">
+            <span id="fan-icon" class="material-symbols-outlined text-[18px]">air</span>
+            <span id="fan-btn-text">Turn On Aeration Fans</span>
+          </button>
+          <button onclick="dismissRotAlert()" class="w-9 h-9 rounded-full bg-white hover:bg-surface-mid border border-red-200 flex items-center justify-center text-charcoal shadow-xs" title="Dismiss">
+            <span class="material-symbols-outlined text-[16px]">close</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Fan Running Confirmation Notice -->
+      <div id="fan-status-notice" class="hidden bg-primary-light text-primary-dark rounded-xl p-3 border border-[#C8E6C9] flex items-center justify-between text-[12px]">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-[18px] text-primary animate-spin-slow">sync</span>
+          <span class="font-extrabold">Ventilation Fan Relay 02 Engaged (Speed: Max)</span>
+        </div>
+        <span class="bg-white px-2 py-0.5 rounded text-[10px] font-bold text-charcoal">Auto-off 45m</span>
+      </div>
+
+      <!-- 4 Telemetry Metrics Grid -->
+      <div class="grid grid-cols-2 gap-2.5">
+        <!-- Temperature -->
+        <div class="bg-white rounded-2xl p-3.5 border border-surface-border shadow-xs flex flex-col justify-between space-y-2">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-[11px] text-charcoal-muted">Temperature</div>
+              <div class="text-[11px] font-bold text-primary">Opt: 24-30°C</div>
+            </div>
+            <span class="material-symbols-outlined text-primary text-[20px]">thermostat</span>
+          </div>
+          <div>
+            <span class="text-[26px] font-extrabold text-charcoal">29.2</span>
+            <span class="text-[13px] text-charcoal-muted">°C</span>
+          </div>
+          <div class="space-y-1">
+            <div class="w-full bg-surface-mid rounded-full h-1.5 overflow-hidden">
+              <div class="bg-primary h-full" style="width: 72%;"></div>
+            </div>
+            <div class="flex items-center justify-between text-[10px]">
+              <span class="font-extrabold text-primary">Safe Limit</span>
+              <span class="text-charcoal-muted">+0.4°C / 24h</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Relative Humidity -->
+        <div class="bg-white rounded-2xl p-3.5 border border-surface-border shadow-xs flex flex-col justify-between space-y-2">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-[11px] text-charcoal-muted">Rel. Humidity</div>
+              <div class="text-[11px] font-bold text-charcoal-muted">Opt: 55-65%</div>
+            </div>
+            <span class="material-symbols-outlined text-charcoal-muted text-[20px]">water_drop</span>
+          </div>
+          <div>
+            <span class="text-[26px] font-extrabold text-charcoal">65.4</span>
+            <span class="text-[13px] text-charcoal-muted">%</span>
+          </div>
+          <div class="space-y-1">
+            <div class="w-full bg-surface-mid rounded-full h-1.5 overflow-hidden">
+              <div class="bg-amber-500 h-full" style="width: 86%;"></div>
+            </div>
+            <div class="flex items-center justify-between text-[10px]">
+              <span class="font-extrabold text-reject">Borderline High</span>
+              <span class="text-charcoal-muted">+4.2% Dew</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Air Flow -->
+        <div class="bg-white rounded-2xl p-3.5 border border-surface-border shadow-xs flex flex-col justify-between space-y-2">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-[11px] text-charcoal-muted">Air Flow</div>
+              <div class="text-[11px] font-bold text-charcoal-muted">Natural Draft</div>
+            </div>
+            <span class="material-symbols-outlined text-primary text-[20px]">air</span>
+          </div>
+          <div>
+            <span class="text-[26px] font-extrabold text-charcoal">1.4</span>
+            <span class="text-[13px] text-charcoal-muted">m/s</span>
+          </div>
+          <div class="text-[10px] space-y-0.5">
+            <div class="font-bold text-charcoal flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+              Louvers 4 &amp; 5 Open
+            </div>
+            <div class="text-charcoal-muted">Cross-vent active</div>
+          </div>
+        </div>
+
+        <!-- Ethylene -->
+        <div class="bg-white rounded-2xl p-3.5 border border-surface-border shadow-xs flex flex-col justify-between space-y-2">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-[11px] text-charcoal-muted">Ethylene (C₂H₄)</div>
+              <div class="text-[11px] font-bold text-charcoal-muted">Rot Biomarker</div>
+            </div>
+            <span class="material-symbols-outlined text-primary text-[20px]">sensors</span>
+          </div>
+          <div>
+            <span class="text-[26px] font-extrabold text-charcoal">12</span>
+            <span class="text-[13px] text-charcoal-muted">ppm</span>
+          </div>
+          <div class="text-[10px] space-y-0.5">
+            <div class="font-bold text-primary flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+              Baseline Safe
+            </div>
+            <div class="text-charcoal-muted">Limit: &lt;25 ppm</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chaal Stack Layout -->
+      <div class="bg-white rounded-2xl p-4 border border-surface-border shadow-xs space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[18px] text-charcoal">layers</span>
+            <h3 class="font-extrabold text-[14px] text-charcoal">Chaal Stack Layout</h3>
+          </div>
+          <span class="text-[11px] text-charcoal-muted">3 Sensor Arrays</span>
+        </div>
+
+        <div class="space-y-2">
+          <!-- Stack A -->
+          <div class="bg-surface-low rounded-xl p-2.5 border border-surface-border flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-primary-light text-primary font-extrabold text-[12px] flex items-center justify-center">
+                A
+              </div>
+              <div>
+                <div class="font-bold text-[12px] text-charcoal">North Wall Tier 1-3</div>
+                <div class="text-[11px] text-charcoal-muted">28.1°C • 58% RH • 8 ppm</div>
+              </div>
+            </div>
+            <span class="bg-primary-fixed text-primary-dark font-extrabold text-[10px] px-2 py-0.5 rounded-full">Safe</span>
+          </div>
+
+          <!-- Stack B -->
+          <div class="bg-surface-low rounded-xl p-2.5 border border-surface-border flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-primary-light text-primary font-extrabold text-[12px] flex items-center justify-center">
+                B
+              </div>
+              <div>
+                <div class="font-bold text-[12px] text-charcoal">Central Bay Tier 1-4</div>
+                <div class="text-[11px] text-charcoal-muted">29.0°C • 62% RH • 11 ppm</div>
+              </div>
+            </div>
+            <span class="bg-primary-fixed text-primary-dark font-extrabold text-[10px] px-2 py-0.5 rounded-full">Safe</span>
+          </div>
+
+          <!-- Stack C2 Alert -->
+          <div class="bg-reject-bg rounded-xl p-2.5 border border-red-200 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-red-100 text-reject font-extrabold text-[12px] flex items-center justify-center">
+                C2
+              </div>
+              <div>
+                <div class="font-bold text-[12px] text-charcoal">South Bay (Micro-pocket)</div>
+                <div class="text-[11px] text-reject font-bold">30.8°C • 68% RH • 21 ppm</div>
+              </div>
+            </div>
+            <span class="bg-reject text-white font-extrabold text-[10px] px-2 py-0.5 rounded-full pulse-dot">Rot Alert</span>
+          </div>
+        </div>
+
+        <!-- Quick Action Buttons -->
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <button onclick="openModal('iot-log-modal')" class="py-2.5 px-3 rounded-xl bg-surface-mid hover:bg-surface-high text-charcoal text-[12px] font-bold flex items-center justify-center gap-1.5 transition-colors">
+            <span class="material-symbols-outlined text-[16px]">download</span>
+            7-Day IoT Log
+          </button>
+          <button id="btn-siren" onclick="testSiren()" class="py-2.5 px-3 rounded-xl bg-surface-mid hover:bg-surface-high text-charcoal text-[12px] font-bold flex items-center justify-center gap-1.5 transition-colors">
+            <span class="material-symbols-outlined text-[16px] text-reject">campaign</span>
+            <span id="siren-text">Siren Test</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== BOTTOM NAVIGATION BAR ==================== -->
+    <nav class="absolute bottom-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-md border-t border-surface-border flex items-center justify-around z-30 px-2">
+      <button onclick="showScreen('home')" id="nav-btn-home" class="flex flex-col items-center justify-center w-20 py-1 text-primary">
+        <span class="material-symbols-outlined text-[24px]">home</span>
+        <span class="text-[11px] font-extrabold mt-0.5">Home</span>
+      </button>
+
+      <button onclick="showScreen('scan')" id="nav-btn-scan" class="flex flex-col items-center justify-center w-20 py-1 text-charcoal-muted hover:text-charcoal transition-colors">
+        <span class="material-symbols-outlined text-[24px] outlined">document_scanner</span>
+        <span class="text-[11px] font-bold mt-0.5">Scan</span>
+      </button>
+
+      <button onclick="showScreen('storage')" id="nav-btn-storage" class="flex flex-col items-center justify-center w-20 py-1 text-charcoal-muted hover:text-charcoal transition-colors">
+        <span class="material-symbols-outlined text-[24px] outlined">warehouse</span>
+        <span class="text-[11px] font-bold mt-0.5">Storage</span>
+      </button>
+    </nav>
+
+    <!-- ==================== TOAST NOTIFICATION ==================== -->
+    <div id="toast" class="hidden absolute top-16 left-4 right-4 bg-charcoal text-white text-[12px] font-bold px-4 py-2.5 rounded-xl shadow-xl z-50 flex items-center gap-2">
+      <span class="material-symbols-outlined text-[18px] text-[#C8E6C9]">info</span>
+      <span id="toast-text">Message</span>
+    </div>
+
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- 1. Digital Receipt Modal -->
+    <div id="receipt-modal" class="hidden fixed inset-0 bg-charcoal/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl max-w-sm w-full p-5 max-h-[88vh] overflow-y-auto space-y-4 shadow-2xl border border-surface-border">
+        <div class="flex items-center justify-between pb-2 border-b border-surface-border">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[24px]">verified</span>
+            <div>
+              <h3 class="font-extrabold text-[14px] text-charcoal">APMC Mandi Ledger Certificate</h3>
+              <p class="text-[10px] text-charcoal-muted">PyazParakh AI Optical Verification</p>
+            </div>
+          </div>
+          <button onclick="closeModal('receipt-modal')" class="w-8 h-8 rounded-full hover:bg-surface-mid flex items-center justify-center text-charcoal">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+
+        <div class="bg-surface-low rounded-2xl p-4 border border-surface-border space-y-3 text-[12px]">
+          <div class="text-center pb-2 border-b border-surface-border">
+            <div class="text-[10px] font-extrabold text-primary tracking-wider uppercase">Lasalgaon APMC Mandi Yard #4</div>
+            <div class="font-extrabold text-[13px] text-charcoal mt-0.5">OFFICIAL ONION PROCUREMENT RECEIPT</div>
+          </div>
+
+          <div class="space-y-1.5">
+            <div class="flex justify-between"><span class="text-charcoal-muted">Lot ID</span><span class="font-bold text-charcoal">PP-8492</span></div>
+            <div class="flex justify-between"><span class="text-charcoal-muted">Procurement Date</span><span class="font-bold text-charcoal">Today, 11:24 AM</span></div>
+            <div class="flex justify-between"><span class="text-charcoal-muted">Assigned Mandi Gate</span><span class="font-bold text-charcoal">GATE 2</span></div>
+            <div class="flex justify-between"><span class="text-charcoal-muted">Farmer / Vendor</span><span class="font-bold text-charcoal">Ramesh Patil</span></div>
+            <div class="flex justify-between"><span class="text-charcoal-muted">Farmer Mobile</span><span class="font-bold text-charcoal">+91 98231 44812</span></div>
+            <div class="flex justify-between"><span class="text-charcoal-muted">Inspecting Officer</span><span class="font-bold text-charcoal">Rajesh Kulkarni (APMC-448)</span></div>
+            <div class="flex justify-between"><span class="text-charcoal-muted">Sample Crate</span><span class="font-bold text-charcoal">Crate #04</span></div>
+            <div class="flex justify-between"><span class="text-charcoal-muted">Sample Size</span><span class="font-bold text-charcoal">142 Bulbs Analyzed</span></div>
+          </div>
+
+          <div class="pt-2 border-t border-surface-border space-y-1.5">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-charcoal">Grade Certification</span>
+              <span class="bg-primary-light text-primary-dark font-extrabold text-[11px] px-2 py-0.5 rounded-full border border-[#C8E6C9]">
+                GRADE A • 76% YIELD
+              </span>
+            </div>
+            <div class="flex justify-between text-[11px]"><span class="text-charcoal-muted">Commercial Yield</span><span class="font-bold text-primary">93% Usable Produce</span></div>
+            <div class="flex justify-between text-[11px]"><span class="text-charcoal-muted">Defects / Rot</span><span class="font-bold text-reject">7% Rejected (10 Bulbs)</span></div>
+          </div>
+
+          <div class="pt-2 border-t border-surface-border flex justify-between items-center">
+            <span class="font-extrabold text-charcoal">Settlement Rate</span>
+            <span class="text-[16px] font-extrabold text-primary">₹2,450 / Quintal</span>
+          </div>
+        </div>
+
+        <!-- Blockchain QR Hash -->
+        <div class="bg-white rounded-xl p-3 border border-surface-border flex items-center gap-3">
+          <span class="material-symbols-outlined text-[44px] text-charcoal">qr_code_2</span>
+          <div class="text-[10px]">
+            <div class="font-bold text-charcoal font-mono">HASH: APMC-PP8492-2026-X99</div>
+            <div class="text-charcoal-muted">Cryptographically verified on APMC Mandi e-NAM Gateway ledger.</div>
+          </div>
+        </div>
+
+        <div class="flex gap-2">
+          <button onclick="showToast('Receipt PDF exported to device storage'); closeModal('receipt-modal')" class="flex-1 py-2.5 rounded-xl border border-surface-border hover:bg-surface-mid font-bold text-[12px] text-charcoal">
+            Save / Print
+          </button>
+          <button onclick="showToast('Dispatched digital receipt via WhatsApp to +91 98231 44812'); closeModal('receipt-modal')" class="flex-1 py-2.5 rounded-xl bg-primary hover:bg-primary-dark text-white font-extrabold text-[12px]">
+            WhatsApp
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Bulb Diagnostics Modal -->
+    <div id="bulb-modal" class="hidden fixed inset-0 bg-charcoal/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl border border-surface-border">
+        <div class="flex items-center justify-between pb-2 border-b border-surface-border">
+          <div>
+            <h3 class="font-extrabold text-[15px] text-charcoal">Bulb Optical Diagnostics</h3>
+            <p class="text-[10px] text-charcoal-muted">AI Reticle Inspection • Model v4.2</p>
+          </div>
+          <button onclick="closeModal('bulb-modal')" class="w-8 h-8 rounded-full hover:bg-surface-mid flex items-center justify-center text-charcoal">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+
+        <div class="flex items-center justify-between">
+          <span id="bm-badge" class="bg-primary-light text-primary-dark font-extrabold text-[12px] px-2.5 py-0.5 rounded-full border border-[#C8E6C9]">
+            Grade A • 55mm
+          </span>
+          <span id="bm-conf" class="text-[12px] font-bold text-charcoal-muted">98% AI Confidence</span>
+        </div>
+
+        <div class="bg-surface-low rounded-xl p-3.5 border border-surface-border space-y-2 text-[12px]">
+          <div class="flex justify-between"><span class="text-charcoal-muted">Equatorial Diameter</span><span id="bm-size" class="font-bold text-charcoal">55 mm</span></div>
+          <div class="flex justify-between"><span class="text-charcoal-muted">Quality Standard</span><span id="bm-grade" class="font-bold text-charcoal">Grade A (45-65mm)</span></div>
+          <div class="flex justify-between"><span class="text-charcoal-muted">Skin Dryness Index</span><span id="bm-skin" class="font-bold text-charcoal">Optimal 94% Dry Papery</span></div>
+          <div class="flex justify-between"><span class="text-charcoal-muted">Neck Closure</span><span id="bm-neck" class="font-bold text-charcoal">Tight &amp; Dried</span></div>
+          <div id="bm-defect-row" class="hidden pt-2 border-t border-surface-border flex justify-between text-reject font-bold">
+            <span>Defect Flag</span><span id="bm-defect">Basal Rot</span>
+          </div>
+        </div>
+
+        <button onclick="closeModal('bulb-modal')" class="w-full py-2.5 rounded-full bg-primary hover:bg-primary-dark text-white font-extrabold text-[13px]">
+          Dismiss Diagnostic
+        </button>
+      </div>
+    </div>
+
+    <!-- 3. Camera Capture Simulation Modal -->
+    <div id="capture-modal" class="hidden fixed inset-0 bg-charcoal/70 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl max-w-sm w-full p-5 space-y-3.5 shadow-2xl border border-surface-border">
+        <div class="flex items-center justify-between pb-2 border-b border-surface-border">
+          <div>
+            <h3 class="font-extrabold text-[15px] text-charcoal">Optical Batch Capture</h3>
+            <p class="text-[11px] text-charcoal-muted">Hold level at 1.2m over produce crate</p>
+          </div>
+          <button onclick="closeModal('capture-modal')" class="w-8 h-8 rounded-full hover:bg-surface-mid flex items-center justify-center text-charcoal">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+
+        <!-- Camera Viewfinder -->
+        <div class="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-charcoal">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0qIG8K8FnivzOpHb1wwonVVisWHqlGA5cWxwj49rCOZAd3KQJDZd248zfkqj6IQSLzNX4_zbGgVmAG0E9gOG1YOYhK49KDok7AanlTX5hyV824p-KqCuWjQuTwvMeYhNpWG3OjC8a8TISreWcpyqlYBIQdTTN44BxZhecxjykGPOWcAJ19Ha_GFi8gb0Q1pmF34bMyzPyfB2BWR72jbV7HTaqUQTfHTBtk3XNbR6s_HDfH2Oi_hFYNg" alt="Viewfinder" class="w-full h-full object-cover"/>
+          <div class="absolute inset-4 border-2 border-dashed border-[#C8E6C9] rounded-lg pointer-events-none"></div>
+          
+          <div class="absolute top-2 left-2 bg-charcoal/80 text-white text-[10px] px-2 py-0.5 rounded-full">
+            1.20m Distance OK
+          </div>
+          <div class="absolute top-2 right-2 bg-charcoal/80 text-white text-[10px] px-2 py-0.5 rounded-full">
+            Lux: 8,420 (Bright)
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <div>
+            <label class="text-[11px] font-bold text-charcoal-muted block mb-1">Farmer / Vendor Name</label>
+            <input type="text" id="input-farmer-name" value="Vikram Deshmukh" class="w-full px-3 py-2 border border-surface-border rounded-lg text-[13px] font-semibold text-charcoal focus:border-primary outline-none"/>
+          </div>
+          <div>
+            <label class="text-[11px] font-bold text-charcoal-muted block mb-1">Crate / Lot Reference</label>
+            <input type="text" id="input-crate-ref" value="Crate #05 (Plastic)" class="w-full px-3 py-2 border border-surface-border rounded-lg text-[13px] font-semibold text-charcoal focus:border-primary outline-none"/>
+          </div>
+        </div>
+
+        <button onclick="executeBatchCapture()" class="w-full py-3 bg-primary hover:bg-primary-dark active:scale-[0.98] transition-all text-white font-extrabold text-[14px] rounded-full shadow-md flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-[20px]">photo_camera</span>
+          Snap &amp; Grade Batch (10-sec AI)
+        </button>
+      </div>
+    </div>
+
+    <!-- 4. 7-Day IoT Log Modal -->
+    <div id="iot-log-modal" class="hidden fixed inset-0 bg-charcoal/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl max-w-sm w-full p-5 space-y-3.5 shadow-2xl border border-surface-border">
+        <div class="flex items-center justify-between pb-2 border-b border-surface-border">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[22px]">history</span>
+            <div>
+              <h3 class="font-extrabold text-[14px] text-charcoal">7-Day Chaal IoT Telemetry</h3>
+              <p class="text-[10px] text-charcoal-muted">Kanda Chaal #07 • Sensor Log</p>
+            </div>
+          </div>
+          <button onclick="closeModal('iot-log-modal')" class="w-8 h-8 rounded-full hover:bg-surface-mid flex items-center justify-center text-charcoal">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+
+        <div class="space-y-1.5 text-[12px]">
+          <div class="bg-surface-low rounded-xl p-2.5 border border-surface-border flex justify-between items-center">
+            <div><div class="font-bold text-charcoal">Today (Wed, Sep 30)</div><div class="text-[10px] text-charcoal-muted">Lasalgaon Niphad Yard</div></div>
+            <div class="text-right"><div class="font-extrabold text-reject">29.2°C • 65.4% RH</div><span class="text-[10px] font-bold text-reject">Elevated C2</span></div>
+          </div>
+          <div class="bg-surface-low rounded-xl p-2.5 border border-surface-border flex justify-between items-center">
+            <div><div class="font-bold text-charcoal">Tue, Sep 29</div><div class="text-[10px] text-charcoal-muted">Lasalgaon Niphad Yard</div></div>
+            <div class="text-right"><div class="font-extrabold text-charcoal">28.6°C • 61.2% RH</div><span class="text-[10px] font-bold text-primary">Safe / Stable</span></div>
+          </div>
+          <div class="bg-surface-low rounded-xl p-2.5 border border-surface-border flex justify-between items-center">
+            <div><div class="font-bold text-charcoal">Mon, Sep 28</div><div class="text-[10px] text-charcoal-muted">Lasalgaon Niphad Yard</div></div>
+            <div class="text-right"><div class="font-extrabold text-charcoal">28.1°C • 59.8% RH</div><span class="text-[10px] font-bold text-primary">Safe / Stable</span></div>
+          </div>
+          <div class="bg-surface-low rounded-xl p-2.5 border border-surface-border flex justify-between items-center">
+            <div><div class="font-bold text-charcoal">Sun, Sep 27</div><div class="text-[10px] text-charcoal-muted">Lasalgaon Niphad Yard</div></div>
+            <div class="text-right"><div class="font-extrabold text-charcoal">27.8°C • 58.4% RH</div><span class="text-[10px] font-bold text-primary">Optimal Aeration</span></div>
+          </div>
+          <div class="bg-surface-low rounded-xl p-2.5 border border-surface-border flex justify-between items-center">
+            <div><div class="font-bold text-charcoal">Sat, Sep 26</div><div class="text-[10px] text-charcoal-muted">Lasalgaon Niphad Yard</div></div>
+            <div class="text-right"><div class="font-extrabold text-charcoal">28.4°C • 60.1% RH</div><span class="text-[10px] font-bold text-primary">Safe / Stable</span></div>
+          </div>
+        </div>
+
+        <button onclick="closeModal('iot-log-modal')" class="w-full py-2.5 rounded-full bg-primary hover:bg-primary-dark text-white font-extrabold text-[13px]">
+          Close Log
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let currentScreen = 'home';
+    let isAerationRunning = false;
+
+    // Navigation Switcher
+    function showScreen(screen) {
+      currentScreen = screen;
+      document.getElementById('screen-home').classList.add('hidden');
+      document.getElementById('screen-scan').classList.add('hidden');
+      document.getElementById('screen-storage').classList.add('hidden');
+
+      document.getElementById('nav-btn-home').className = "flex flex-col items-center justify-center w-20 py-1 text-charcoal-muted hover:text-charcoal transition-colors";
+      document.getElementById('nav-btn-scan').className = "flex flex-col items-center justify-center w-20 py-1 text-charcoal-muted hover:text-charcoal transition-colors";
+      document.getElementById('nav-btn-storage').className = "flex flex-col items-center justify-center w-20 py-1 text-charcoal-muted hover:text-charcoal transition-colors";
+
+      document.getElementById('header-back-btn').classList.add('hidden');
+      document.getElementById('header-branding').classList.remove('hidden');
+      document.getElementById('header-title').classList.add('hidden');
+
+      if (screen === 'home') {
+        document.getElementById('screen-home').classList.remove('hidden');
+        document.getElementById('nav-btn-home').className = "flex flex-col items-center justify-center w-20 py-1 text-primary";
+      } else if (screen === 'scan') {
+        document.getElementById('screen-scan').classList.remove('hidden');
+        document.getElementById('nav-btn-scan').className = "flex flex-col items-center justify-center w-20 py-1 text-primary";
+        document.getElementById('header-back-btn').classList.remove('hidden');
+        document.getElementById('header-branding').classList.add('hidden');
+        document.getElementById('header-title').classList.remove('hidden');
+      } else if (screen === 'storage') {
+        document.getElementById('screen-storage').classList.remove('hidden');
+        document.getElementById('nav-btn-storage').className = "flex flex-col items-center justify-center w-20 py-1 text-primary";
+      }
+    }
+
+    function openInspectionDetail(lotId) {
+      document.getElementById('detail-lot-title').textContent = 'Lot #' + lotId;
+      showScreen('scan');
+    }
+
+    // Modal Control
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    // Reticle Filters
+    function filterReticles(filter) {
+      const buttons = ['all', 'grade-a', 'urs', 'reject'];
+      buttons.forEach(b => {
+        const btn = document.getElementById('rf-' + b);
+        if (b === filter) {
+          btn.className = "flex-1 py-1.5 rounded-full text-[11px] font-bold bg-charcoal text-white text-center shadow-xs transition-colors";
+        } else {
+          btn.className = "flex-1 py-1.5 rounded-full text-[11px] font-bold bg-white text-charcoal border border-surface-border text-center shadow-xs hover:bg-surface-mid transition-colors";
+        }
+      });
+
+      const reticles = document.querySelectorAll('.reticle-box');
+      reticles.forEach(r => {
+        if (filter === 'all') {
+          r.style.display = 'block';
+        } else if (r.classList.contains('reticle-' + filter)) {
+          r.style.display = 'block';
+        } else {
+          r.style.display = 'none';
+        }
+      });
+    }
+
+    // Bulb Diagnostics Modal Opener
+    function openBulbDiagnostic(title, size, grade, conf, skin, neck, defect) {
+      document.getElementById('bm-badge').textContent = title;
+      document.getElementById('bm-size').textContent = size;
+      document.getElementById('bm-grade').textContent = grade;
+      document.getElementById('bm-conf').textContent = conf + ' AI Confidence';
+      document.getElementById('bm-skin').textContent = skin;
+      document.getElementById('bm-neck').textContent = neck;
+
+      const defectRow = document.getElementById('bm-defect-row');
+      if (defect) {
+        defectRow.classList.remove('hidden');
+        document.getElementById('bm-defect').textContent = defect;
+      } else {
+        defectRow.classList.add('hidden');
+      }
+
+      openModal('bulb-modal');
+    }
+
+    // Toggle Aeration Fans
+    function toggleAerationFans() {
+      isAerationRunning = !isAerationRunning;
+      const notice = document.getElementById('fan-status-notice');
+      const btn = document.getElementById('btn-aeration-toggle');
+      const text = document.getElementById('fan-btn-text');
+      const icon = document.getElementById('fan-icon');
+
+      if (isAerationRunning) {
+        notice.classList.remove('hidden');
+        btn.classList.remove('bg-primary');
+        btn.classList.add('bg-charcoal');
+        text.textContent = 'Aeration Running (Max)';
+        icon.textContent = 'sync';
+        icon.classList.add('animate-spin-slow');
+        showToast('Ventilation Fan Relay 02 Engaged (Auto-off 45m)');
+      } else {
+        notice.classList.add('hidden');
+        btn.classList.remove('bg-charcoal');
+        btn.classList.add('bg-primary');
+        text.textContent = 'Turn On Aeration Fans';
+        icon.textContent = 'air';
+        icon.classList.remove('animate-spin-slow');
+        showToast('Ventilation Fans Disengaged');
+      }
+    }
+
+    function dismissRotAlert() {
+      document.getElementById('rot-alert-banner').classList.add('hidden');
+      showToast('Early Rot Alert dismissed for Stack C2');
+    }
+
+    function testSiren() {
+      const text = document.getElementById('siren-text');
+      const prev = text.textContent;
+      text.textContent = 'Sounding (3s)...';
+      showToast('⚠️ APMC Mandi Rot Siren Sounding...');
+      setTimeout(() => {
+        text.textContent = prev;
+      }, 3000);
+    }
+
+    // Profile Toggle
+    function setProfile(p) {
+      const crateBtn = document.getElementById('btn-profile-crate');
+      const trolleyBtn = document.getElementById('btn-profile-trolley');
+      if (p === 'crate') {
+        crateBtn.className = "py-2 px-3 rounded-lg text-[12px] font-bold flex items-center justify-center gap-1.5 bg-charcoal text-white shadow-sm transition-colors";
+        trolleyBtn.className = "py-2 px-3 rounded-lg text-[12px] font-bold flex items-center justify-center gap-1.5 bg-white text-charcoal-muted border border-surface-border hover:bg-surface-mid transition-colors";
+        showToast('Inspection profile: Crate (Top-Down) selected');
+      } else {
+        trolleyBtn.className = "py-2 px-3 rounded-lg text-[12px] font-bold flex items-center justify-center gap-1.5 bg-charcoal text-white shadow-sm transition-colors";
+        crateBtn.className = "py-2 px-3 rounded-lg text-[12px] font-bold flex items-center justify-center gap-1.5 bg-white text-charcoal-muted border border-surface-border hover:bg-surface-mid transition-colors";
+        showToast('Inspection profile: Trolley / Sack Pile selected');
+      }
+    }
+
+    // Batch Capture Action
+    function executeBatchCapture() {
+      const farmer = document.getElementById('input-farmer-name').value || 'Vikram Deshmukh';
+      const ref = document.getElementById('input-crate-ref').value || 'Crate #05';
+      closeModal('capture-modal');
+
+      const newLotId = 'PP-' + Math.floor(8493 + Math.random() * 50);
+      showToast('Batch #' + newLotId + ' successfully graded via AI!');
+      openInspectionDetail(newLotId);
+    }
+
+    // Toast Helper
+    let toastTimer;
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toast-text').textContent = msg;
+      t.classList.remove('hidden');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        t.classList.add('hidden');
+      }, 3200);
+    }
+  </script>
+</body>
+</html>

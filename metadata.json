@@ -1,0 +1,6 @@
+{
+  "name": "PyazParakh",
+  "description": "AI & IoT Onion Grading System for APMC procurement officers and mandi yards",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
